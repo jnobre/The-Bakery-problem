@@ -1,10 +1,13 @@
 package pt.jnobre.padaria;
 
+import javafx.scene.SubScene;
+import javafx.util.Pair;
 import pt.jnobre.padaria.model.Code;
 import pt.jnobre.padaria.model.Pack;
 import pt.jnobre.padaria.model.Product;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
@@ -12,7 +15,7 @@ import java.util.Scanner;
 public class Main {
 
     static List<Product> products;
-    private static final Scanner scanner = new Scanner(System.in);
+    private static final Scanner input = new Scanner(System.in);
 
     public static void loadProducts() {
 
@@ -39,28 +42,31 @@ public class Main {
 
 
     public static void main(String[] args)  throws IOException{
-        BufferedWriter bufferedWriter = null;
+        List<Pair<Code, Integer>> orders = new ArrayList<Pair<Code, Integer>>();
 
         try {
 
-            bufferedWriter = new BufferedWriter(new FileWriter(System.getenv("OUTPUT_PATH")));
 
             loadProducts();
 
-            while (scanner.hasNext()) {
-                System.out.println(scanner.next());
+            while (input.hasNextLine()) {
+                String[] line = input.nextLine().split(" ");
+                Integer qty = Integer.parseInt(line[0]);
+                Code code = Code.valueOf(line[1]);
+                orders.add( new Pair<Code, Integer>(code, qty) );
             }
 
 
-        } catch (IOException e) {
-            System.out.print("Cannot append, buffered writer is closed");
+
+        } catch (NumberFormatException e1)  {
+            System.out.println("Invalid Input");
+            throw e1;
+        } catch (IllegalArgumentException e2)  {
+            System.out.println("Invalid Code");
+            throw e2;
         } finally {
-            if(bufferedWriter != null) {
-                bufferedWriter.close();
-            }
-
-            if(scanner != null)
-                scanner.close();
+            if(input != null)
+                input.close();
         }
 
 
