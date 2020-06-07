@@ -1,4 +1,4 @@
-#The Bakery problem
+# The Bakery problem
 
 The bakery uses the item's individual price to generate its orders. Therefore, if a customer ordered 10 pasteis de nata, he would be charged 10 x the cost of a single pastel de nata. The bakery decided to start selling its prepackaged products in packages, charging its customers for packaging. So if the bakery sells the pre-packaged custard tarts in packs of 3 and 5, if a customer orders 8 custard tarts, they would receive a pack of 3 and a pack of 5.
 Given an order from a customer I have to return the number of packages that are necessary to satisfy the customer's order, minimizing the number of packages.
