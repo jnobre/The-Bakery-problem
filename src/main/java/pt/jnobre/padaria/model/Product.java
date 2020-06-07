@@ -1,6 +1,8 @@
 package pt.jnobre.padaria.model;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class Product {
 
@@ -36,5 +38,14 @@ public class Product {
 
     public void setPacks(List<Pack> packs) {
         this.packs = packs;
+    }
+
+    @Override
+    public String toString() {
+        return "Product{" +
+                "description='" + description + '\'' +
+                ", codeProduct=" + codeProduct +
+                ", packs=" + packs.stream().map(o -> Objects.toString(o, null)).collect(Collectors.toList()) +
+                '}';
     }
 }

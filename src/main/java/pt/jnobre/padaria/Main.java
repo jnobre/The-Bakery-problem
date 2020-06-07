@@ -1,59 +1,156 @@
 package pt.jnobre.padaria;
 
-import javafx.scene.SubScene;
 import javafx.util.Pair;
 import pt.jnobre.padaria.model.Code;
 import pt.jnobre.padaria.model.Pack;
 import pt.jnobre.padaria.model.Product;
 
-import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Scanner;
+import java.text.DecimalFormat;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Main {
 
-    static List<Product> products;
+    private static List<Product> products;
     private static final Scanner input = new Scanner(System.in);
+    private static DecimalFormat df = new DecimalFormat("0.00");
+    private static int minPacks;
+    private static int[] solution;
+    private static float totalPrice;
 
-    public static void loadProducts() {
+    /**
+     * Products print.
+     */
+    private static void printStock() {
+        products.forEach(System.out::println);
+    }
 
-        Pack pn_1 = new Pack(3,6.99f,Code.PN);
-        Pack pn_2 = new Pack(5,8.99f,Code.PN);
+    /**
+     * Loads the inventory of products and packages into memory.
+     */
+    private static void loadProducts() {
 
-        Product pn = new Product("Pastel de Nata", Code.PN, Arrays.asList(pn_1,pn_2));
+        Pack pn_1 = new Pack(5,8.99f,Code.PN);
+        Pack pn_2 = new Pack(3,6.99f,Code.PN);
 
-        Pack ts_1 = new Pack(2,9.95f,Code.TS);
+        Product pn = new Product("Pastel de Nata", Code.PN, Arrays.asList(pn_1,pn_2).stream().sorted().collect(Collectors.toList()));
+
+        Pack ts_1 = new Pack(8,24.95f,Code.TS);
         Pack ts_2 = new Pack(5,16.95f,Code.TS);
-        Pack ts_3 = new Pack(8,24.95f,Code.TS);
+        Pack ts_3 = new Pack(2,9.95f,Code.TS);
 
-        Product ts = new Product("Travesseiros de Sintra", Code.TS, Arrays.asList(ts_1,ts_2,ts_3));
+        Product ts = new Product("Travesseiros de Sintra", Code.TS,  Arrays.asList(ts_1,ts_2,ts_3).stream().sorted().collect(Collectors.toList()));
 
-        Pack qjd_1 = new Pack(3,5.95f,Code.QJD);
+        Pack qjd_1 = new Pack(9,16.99f,Code.QJD);
         Pack qjd_2 = new Pack(5,9.95f,Code.QJD);
-        Pack qjd_3 = new Pack(9,16.99f,Code.QJD);
+        Pack qjd_3 = new Pack(3,5.95f,Code.QJD);
 
-        Product qjd = new Product("Queijadinha", Code.QJD, Arrays.asList(qjd_1,qjd_2,qjd_3));
+        Product qjd = new Product("Queijadinha", Code.QJD, Arrays.asList(qjd_1,qjd_2,qjd_3).stream().sorted().collect(Collectors.toList()));
 
         products = Arrays.asList(pn,ts,qjd);
 
     }
 
 
-    public static void main(String[] args)  throws IOException{
+    /**
+     * Finds the smallest combination of packages for a given quantity.
+     * @param packs
+     * @param qty
+     * @param amount
+     * @param counters
+     * @param countPacks
+     * @param price
+     */
+    private static void findMinPacks(List<Pack> packs, int qty, int amount, int[] counters, int countPacks, float price) {
+/*
+
+        for(int i = 0 ; i < counters.length ; i ++)
+            System.out.print(counters[i] + " ");
+        System.out.println("\n");
+*/
+
+        if(amount > qty)
+            return;
+
+        if(qty == amount){ //found a possibility
+            if(countPacks < minPacks) {
+                minPacks = countPacks;
+                solution = Arrays.copyOf(counters, counters.length);
+                totalPrice = price;
+            }
+            return;
+        }
+
+        for(int i = 0 ; i < counters.length ; i++) {
+            amount = amount + packs.get(i).getQuantity();
+            counters[i] = counters[i] + 1;
+            countPacks = countPacks + 1;
+            price = price + packs.get(i).getPrice();
+
+            findMinPacks(packs, qty, amount, counters, countPacks, price);
+
+            counters[i] = counters[i] - 1;
+            countPacks = countPacks - 1;
+            amount = amount - packs.get(i).getQuantity();
+            price = price - packs.get(i).getPrice();
+        }
+
+    }
+
+
+    /**
+     * Determine nature of product and prints the final solution.
+     * @param codeProduct
+     * @param qty
+     */
+    private static void Solve(final Code codeProduct, Integer qty) {
+
+        int table[] = new int[qty + 1];
+        Pack packsUsed[] = new Pack[qty + 1];
+        table[0] = 0;
+
+        for(int i = 1 ; i <= qty ; i++)
+            table[i] = Integer.MAX_VALUE;
+
+        Product product = products.stream()
+                .filter(p -> codeProduct.equals(p.getCodeProduct()))
+                .findAny()
+                .orElse(null);
+
+        List<Pack> packs = product.getPacks();
+
+        int[] counters = new int[packs.size()];
+        solution = new int[packs.size()];
+        minPacks = Integer.MAX_VALUE;
+        totalPrice = 0;
+
+        findMinPacks(packs, qty, 0, counters, 0, 0); //recursive solution
+
+        System.out.println(qty + " " + codeProduct + " €" + df.format(totalPrice));
+        for(int i = 0 ; i < solution.length ; i++) {
+            if(solution[i] > 0)
+                System.out.println(solution[i] + " * " + packs.get(i).getQuantity() + " €" + df.format(packs.get(i).getPrice()));
+        }
+
+    }
+
+    public static void main(String[] args) {
         List<Pair<Code, Integer>> orders = new ArrayList<Pair<Code, Integer>>();
 
         try {
 
-
             loadProducts();
+//            printStock();
 
             while (input.hasNextLine()) {
                 String[] line = input.nextLine().split(" ");
                 Integer qty = Integer.parseInt(line[0]);
                 Code code = Code.valueOf(line[1]);
-                orders.add( new Pair<Code, Integer>(code, qty) );
+                orders.add(new Pair<>(code, qty) );
+            }
+
+            for(Pair<Code,Integer> order : orders) {
+                Solve(order.getKey(),order.getValue());
             }
 
 
@@ -64,6 +161,8 @@ public class Main {
         } catch (IllegalArgumentException e2)  {
             System.out.println("Invalid Code");
             throw e2;
+        } catch(Exception e) {
+            throw e;
         } finally {
             if(input != null)
                 input.close();
