@@ -11,12 +11,12 @@ import java.util.stream.Collectors;
 
 public class Main {
 
-    private static List<Product> products;
+    public static List<Product> products;
     private static final Scanner input = new Scanner(System.in);
     private static DecimalFormat df = new DecimalFormat("0.00");
-    private static int minPacks;
-    private static int[] solution;
-    private static float totalPrice;
+    public static int minPacks;
+    public static int[] solution;
+    public static float totalPrice;
 
     /**
      * Products print.
@@ -28,7 +28,7 @@ public class Main {
     /**
      * Loads the inventory of products and packages into memory.
      */
-    private static void loadProducts() {
+    public static void loadProducts() {
 
         Pack pn_1 = new Pack(5,8.99f,Code.PN);
         Pack pn_2 = new Pack(3,6.99f,Code.PN);
@@ -61,13 +61,7 @@ public class Main {
      * @param countPacks
      * @param price
      */
-    private static void findMinPacks(List<Pack> packs, int qty, int amount, int[] counters, int countPacks, float price) {
-/*
-
-        for(int i = 0 ; i < counters.length ; i ++)
-            System.out.print(counters[i] + " ");
-        System.out.println("\n");
-*/
+    public static void findMinPacks(List<Pack> packs, int qty, int amount, int[] counters, int countPacks, float price) {
 
         if(amount > qty)
             return;
@@ -103,14 +97,7 @@ public class Main {
      * @param codeProduct
      * @param qty
      */
-    private static void Solve(final Code codeProduct, Integer qty) {
-
-        int table[] = new int[qty + 1];
-        Pack packsUsed[] = new Pack[qty + 1];
-        table[0] = 0;
-
-        for(int i = 1 ; i <= qty ; i++)
-            table[i] = Integer.MAX_VALUE;
+    public static void Solve(final Code codeProduct, Integer qty) {
 
         Product product = products.stream()
                 .filter(p -> codeProduct.equals(p.getCodeProduct()))
@@ -129,19 +116,20 @@ public class Main {
         System.out.println(qty + " " + codeProduct + " €" + df.format(totalPrice));
         for(int i = 0 ; i < solution.length ; i++) {
             if(solution[i] > 0)
-                System.out.println(solution[i] + " * " + packs.get(i).getQuantity() + " €" + df.format(packs.get(i).getPrice()));
+                System.out.println("\t"+ solution[i] + " * " + packs.get(i).getQuantity() + " €" + df.format(packs.get(i).getPrice()));
         }
 
     }
 
     public static void main(String[] args) {
-        List<Pair<Code, Integer>> orders = new ArrayList<Pair<Code, Integer>>();
+        List<Pair<Code, Integer>> orders = new ArrayList<>();
 
         try {
 
             loadProducts();
 //            printStock();
 
+            //read input
             while (input.hasNextLine()) {
                 String[] line = input.nextLine().split(" ");
                 Integer qty = Integer.parseInt(line[0]);
